@@ -15,19 +15,6 @@
 
 ---
 
-## 📸 Screenshots
-
-<p align="center">
-  <img src="https://via.placeholder.com/400x200/0a0010/00ffff?text=Space+Battle" width="400" alt="Space Battle">
-  <img src="https://via.placeholder.com/400x200/1a1200/ffcc00?text=Tank+Battle" width="400" alt="Tank Battle">
-</p>
-<p align="center">
-  <img src="https://via.placeholder.com/400x200/1a0020/ff00ff?text=Tetris+Ultimate+Pro" width="400" alt="Tetris">
-  <img src="https://via.placeholder.com/400x200/1a0800/ff8800?text=Stickman+Fight" width="400" alt="Stickman Fight">
-</p>
-
----
-
 ## 🎯 Juegos incluidos
 
 | # | Juego | Géneros | Estado |
