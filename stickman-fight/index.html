@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stickman Fight Legends Pro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- UI overlay layer (menus, HUD, screens) -->
+  <div id="ui-layer">
+
+    <!-- ===== MAIN MENU ===== -->
+    <div id="screen-main-menu" class="screen active">
+      <div class="menu-bg-anim"></div>
+      <div class="menu-center">
+        <h1 class="game-title">
+          <span class="title-stick"></span>
+          Stickman Fight<br><em>Legends Pro</em>
+        </h1>
+        <nav class="main-nav">
+          <button class="btn-menu" data-action="play">⚔ Jugar</button>
+          <button class="btn-menu" data-action="instructions">📋 Instrucciones</button>
+          <button class="btn-menu" data-action="stats">🏆 Estadísticas</button>
+          <button class="btn-menu" data-action="credits">✦ Créditos</button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- ===== GAME MODE SELECT ===== -->
+    <div id="screen-mode" class="screen">
+      <h2 class="screen-title">Modo de Juego</h2>
+      <div class="mode-cards">
+        <div class="mode-card" data-mode="pvp">
+          <div class="mode-icon">👥</div>
+          <h3>Jugador vs Jugador</h3>
+          <p>Dos jugadores, una pantalla</p>
+        </div>
+        <div class="mode-card" data-mode="pvc">
+          <div class="mode-icon">🤖</div>
+          <h3>Jugador vs CPU</h3>
+          <p>Desafía a la IA</p>
+        </div>
+      </div>
+
+      <!-- Difficulty — only visible when PvC selected -->
+      <div id="difficulty-section" class="difficulty-section hidden">
+        <div class="difficulty-label">Dificultad</div>
+        <div class="difficulty-btns">
+          <button class="diff-btn" data-diff="easy">😊 Fácil</button>
+          <button class="diff-btn selected" data-diff="normal">⚔ Normal</button>
+          <button class="diff-btn" data-diff="hard">💀 Difícil</button>
+        </div>
+
+      </div>
+
+      <!-- Controls tip -->
+      <div class="mode-tip">
+        <span class="tip-icon">🦘</span>
+        <span><strong>Doble Salto:</strong> Presiona saltar una segunda vez en el aire para impulsarte de nuevo. El segundo salto tiene menos potencia.</span>
+      </div>
+
+      <button class="btn-next" id="btn-mode-next">Siguiente →</button>
+      <button class="btn-back">← Volver</button>
+    </div>
+
+    <!-- ===== CHARACTER SELECT ===== -->
+    <div id="screen-char-select" class="screen">
+      <h2 class="screen-title">Selección de Personaje</h2>
+      <div class="char-select-grid">
+        <div class="player-pick" id="p1-pick">
+          <h3>Jugador 1</h3>
+          <div class="player-pick-inner">
+            <div class="char-list" data-player="1"></div>
+            <div class="char-right-panel">
+              <div class="char-info" id="p1-info"></div>
+            </div>
+          </div>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="player-pick" id="p2-pick">
+          <h3 id="p2-label">Jugador 2</h3>
+          <div class="player-pick-inner">
+            <div class="char-list" data-player="2"></div>
+            <div class="char-right-panel">
+              <div class="char-info" id="p2-info"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" id="btn-to-arena">Siguiente →</button>
+      <button class="btn-back">← Volver</button>
+    </div>
+
+    <!-- ===== ARENA SELECT ===== -->
+    <div id="screen-arena-select" class="screen">
+      <h2 class="screen-title">Selección de Arena</h2>
+      <div class="arena-grid" id="arena-grid"></div>
+      <button class="btn-next" id="btn-start-fight">¡PELEAR!</button>
+      <button class="btn-back">← Volver</button>
+    </div>
+
+    <!-- ===== INSTRUCTIONS ===== -->
+    <div id="screen-instructions" class="screen">
+      <h2 class="screen-title">Instrucciones</h2>
+      <div class="instr-container">
+
+        <div class="instr-players">
+          <!-- P1 -->
+          <div class="instr-card instr-p1">
+            <div class="instr-player-title" style="color:var(--c-p1)">⚡ Jugador 1</div>
+            <div class="instr-rows">
+              <div class="instr-row"><span class="instr-label">Moverse</span><span class="instr-keys"><kbd>A</kbd><kbd>D</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Saltar</span><span class="instr-keys"><kbd>W</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Defender</span><span class="instr-keys"><kbd>S</kbd></span></div>
+              <div class="instr-divider"></div>
+              <div class="instr-row"><span class="instr-label">Puño</span><span class="instr-keys"><kbd>G</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Patada</span><span class="instr-keys"><kbd>H</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Especial</span><span class="instr-keys"><kbd>J</kbd></span></div>
+            </div>
+          </div>
+
+          <div class="instr-vs">VS</div>
+
+          <!-- P2 -->
+          <div class="instr-card instr-p2">
+            <div class="instr-player-title" style="color:var(--c-p2)">🔥 Jugador 2</div>
+            <div class="instr-rows">
+              <div class="instr-row"><span class="instr-label">Moverse</span><span class="instr-keys"><kbd>←</kbd><kbd>→</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Saltar</span><span class="instr-keys"><kbd>↑</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Defender</span><span class="instr-keys"><kbd>↓</kbd></span></div>
+              <div class="instr-divider"></div>
+              <div class="instr-row"><span class="instr-label">Puño</span><span class="instr-keys"><kbd>7</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Patada</span><span class="instr-keys"><kbd>8</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Especial</span><span class="instr-keys"><kbd>9</kbd></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="instr-tips">
+          <div class="instr-tip"><span class="tip-icon">🦘</span><span><strong>Doble Salto:</strong> Presiona saltar <em>una segunda vez en el aire</em> para impulsarte de nuevo. Útil para esquivar y cruzar sobre el rival.</span></div>
+          <div class="instr-tip"><span class="tip-icon">🛡</span><span>La <strong>defensa</strong> reduce el daño 60%. No puedes atacar mientras la sostienes.</span></div>
+          <div class="instr-tip"><span class="tip-icon">👊</span><span>El <strong>puño</strong> es rápido. La <strong>patada</strong> hace más daño y mayor knockback.</span></div>
+          <div class="instr-tip"><span class="tip-icon">⚡</span><span>El <strong>especial</strong> usa la barra de energía. ¡Cooldown de 3 segundos!</span></div>
+          <div class="instr-tip"><span class="tip-icon">⏸</span><span>Presiona <kbd>ESC</kbd> para pausar la partida.</span></div>
+        </div>
+
+        <button class="btn-back">← Volver</button>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div id="screen-stats" class="screen">
+      <h2 class="screen-title">Estadísticas</h2>
+      <div class="stats-box" id="stats-display"></div>
+      <button class="btn-danger" id="btn-reset-stats">Reiniciar Stats</button>
+      <button class="btn-back">← Volver</button>
+    </div>
+
+    <!-- ===== CREDITS ===== -->
+    <div id="screen-credits" class="screen">
+      <h2 class="screen-title">Créditos</h2>
+      <div class="credits-content">
+        <p class="credit-big">Stickman Fight Legends Pro</p>
+        <p>Desarrollado con HTML5 · CSS3 · JavaScript Vanilla</p>
+        <p>Canvas API · Web Audio API</p>
+        <p class="credit-version">v1.0.0 — 2026</p>
+      </div>
+      <button class="btn-back">← Volver</button>
+    </div>
+
+    <!-- ===== GAME HUD ===== -->
+    <div id="screen-game" class="screen">
+      <!-- HUD drawn via JS/canvas but we keep a thin DOM layer for round/timer text -->
+      <div id="hud-overlay">
+        <div id="hud-p1" class="hud-player left">
+          <div class="hud-name" id="hud-p1-name">P1</div>
+          <div class="hud-bar-wrap">
+            <div class="hud-bar hp-bar" id="hud-p1-hp"></div>
+          </div>
+          <div class="hud-bar-wrap energy-wrap">
+            <div class="hud-bar energy-bar" id="hud-p1-energy"></div>
+          </div>
+          <div class="win-dots" id="hud-p1-wins"></div>
+        </div>
+        <div id="hud-center">
+          <div id="hud-round">ROUND 1</div>
+          <div id="hud-timer">60</div>
+        </div>
+        <div id="hud-p2" class="hud-player right">
+          <div class="hud-name" id="hud-p2-name">P2</div>
+          <div class="hud-bar-wrap">
+            <div class="hud-bar hp-bar" id="hud-p2-hp"></div>
+          </div>
+          <div class="hud-bar-wrap energy-wrap">
+            <div class="hud-bar energy-bar" id="hud-p2-energy"></div>
+          </div>
+          <div class="win-dots" id="hud-p2-wins"></div>
+        </div>
+      </div>
+      <canvas id="game-canvas"></canvas>
+      <div id="round-announce" class="round-announce hidden"></div>
+      <div id="ko-announce" class="ko-announce hidden"></div>
+      <!-- Pause overlay with buttons -->
+      <div id="pause-overlay" class="pause-overlay hidden">
+        <div class="pause-panel">
+          <div class="pause-title">PAUSA</div>
+          <button class="btn-menu" id="btn-pause-resume">▶ Continuar</button>
+          <button class="btn-back" id="btn-pause-menu">⬅ Menú Principal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MATCH OVER ===== -->
+    <div id="screen-match-over" class="screen">
+      <div class="match-over-content">
+        <div class="trophy-anim">🏆</div>
+        <h1 id="match-winner-text">¡Jugador 1 es el Campeón!</h1>
+        <div class="final-scores" id="final-scores"></div>
+        <button class="btn-menu" id="btn-rematch">Revancha</button>
+        <button class="btn-back" id="btn-main-menu-from-over">Menú Principal</button>
+      </div>
+    </div>
+
+  </div><!-- end ui-layer -->
+
+  <!-- JS modules (order matters) -->
+  <script src="js/audioManager.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/stateMachine.js"></script>
+  <script src="js/projectile.js"></script>
+  <script src="js/collision.js"></script>
+  <script src="js/fighter.js"></script>
+  <script src="js/inputHandler.js"></script>
+  <script src="js/aiController.js"></script>
+  <script src="js/uiManager.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

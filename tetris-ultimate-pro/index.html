@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris Ultimate Pro</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- MAIN MENU -->
+  <div id="screen-main" class="screen active">
+    <div class="scanlines"></div>
+    <div class="menu-container">
+      <div class="logo-wrap">
+        <div class="logo-sub">ULTIMATE</div>
+        <div class="logo-main">TETRIS</div>
+        <div class="logo-pro">PRO</div>
+        <div class="logo-glow"></div>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-btn" id="btn-play">▶ JUGAR</button>
+        <button class="nav-btn" id="btn-instructions">◈ INSTRUCCIONES</button>
+        <button class="nav-btn" id="btn-ranking">◉ RANKING</button>
+      </nav>
+      <div class="version-tag">v2.0 — HTML5 EDITION</div>
+    </div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <!-- MODE SELECT -->
+  <div id="screen-mode" class="screen">
+    <div class="scanlines"></div>
+    <div class="menu-container">
+      <h2 class="screen-title">SELECCIONAR MODO</h2>
+      <div class="mode-cards">
+        <div class="mode-card" data-mode="single">
+          <div class="mode-icon">👤</div>
+          <div class="mode-name">1 JUGADOR</div>
+          <div class="mode-desc">Clásico. Sobrevive el mayor tiempo posible.</div>
+        </div>
+        <div class="mode-card" data-mode="versus">
+          <div class="mode-icon">👥</div>
+          <div class="mode-name">2 JUGADORES</div>
+          <div class="mode-desc">Pantalla dividida. ¡Derrota a tu rival!</div>
+        </div>
+        <div class="mode-card" data-mode="cpu">
+          <div class="mode-icon">🤖</div>
+          <div class="mode-name">VS CPU</div>
+          <div class="mode-desc">Enfrenta a la inteligencia artificial.</div>
+        </div>
+      </div>
+      <button class="nav-btn back-btn" id="btn-mode-back">◄ VOLVER</button>
+    </div>
+  </div>
+
+  <!-- INSTRUCTIONS -->
+  <div id="screen-instructions" class="screen">
+    <div class="scanlines"></div>
+    <div class="menu-container instructions-container">
+      <h2 class="screen-title">INSTRUCCIONES</h2>
+      <div class="instructions-grid">
+        <div class="instr-section">
+          <h3>JUGADOR 1 — WASD (izquierda)</h3>
+          <div class="key-list">
+            <div class="key-row"><kbd>A</kbd><kbd>D</kbd> Mover</div>
+            <div class="key-row"><kbd>W</kbd> Rotar</div>
+            <div class="key-row"><kbd>S</kbd> Bajar rápido</div>
+            <div class="key-row"><kbd>G</kbd> Drop instantáneo</div>
+          </div>
+        </div>
+        <div class="instr-section">
+          <h3>JUGADOR 2 — FLECHAS (derecha)</h3>
+          <div class="key-list">
+            <div class="key-row"><kbd>←</kbd><kbd>→</kbd> Mover</div>
+            <div class="key-row"><kbd>↑</kbd> Rotar</div>
+            <div class="key-row"><kbd>↓</kbd> Bajar rápido</div>
+            <div class="key-row"><kbd>K</kbd> Drop instantáneo</div>
+            <div class="key-row"><kbd>P</kbd> Pausar (modo 1P)</div>
+          </div>
+        </div>
+        <div class="instr-section full-width">
+          <h3>SISTEMA DE PUNTOS</h3>
+          <div class="score-table">
+            <div class="score-row"><span>1 línea</span><span>100 × nivel</span></div>
+            <div class="score-row"><span>2 líneas</span><span>300 × nivel</span></div>
+            <div class="score-row"><span>3 líneas</span><span>500 × nivel</span></div>
+            <div class="score-row"><span>TETRIS (4)</span><span>800 × nivel</span></div>
+            <div class="score-row"><span>Combo ×N</span><span>50 × combo × nivel</span></div>
+          </div>
+        </div>
+      </div>
+      <button class="nav-btn back-btn" id="btn-instr-back">◄ VOLVER</button>
+    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div id="screen-ranking" class="screen">
+    <div class="scanlines"></div>
+    <div class="menu-container">
+      <h2 class="screen-title">RANKING TOP 10</h2>
+      <div class="ranking-tabs">
+        <button class="rank-tab active" data-rmode="single">1 JUGADOR</button>
+        <button class="rank-tab" data-rmode="versus">2 JUGADORES</button>
+        <button class="rank-tab" data-rmode="cpu">VS CPU</button>
+      </div>
+      <div id="ranking-list" class="ranking-list"></div>
+      <button class="nav-btn back-btn" id="btn-rank-back">◄ VOLVER</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN SINGLE / CPU -->
+  <div id="screen-game" class="screen">
+    <div class="scanlines"></div>
+    <div class="game-layout" id="game-layout-single">
+      <!-- LEFT PANEL -->
+      <div class="side-panel left-panel">
+        <div class="panel-block">
+          <div class="panel-label">NIVEL</div>
+          <div class="panel-value" id="p1-level">1</div>
+        </div>
+        <div class="panel-block">
+          <div class="panel-label">SCORE</div>
+          <div class="panel-value" id="p1-score">0</div>
+        </div>
+        <div class="panel-block">
+          <div class="panel-label">LÍNEAS</div>
+          <div class="panel-value" id="p1-lines">0</div>
+        </div>
+        <div class="panel-block">
+          <div class="panel-label">COMBO</div>
+          <div class="panel-value combo-val" id="p1-combo">×1</div>
+        </div>
+        <div class="panel-block">
+          <div class="panel-label">HOLD</div>
+          <canvas id="p1-hold-canvas" width="120" height="120"></canvas>
+        </div>
+      </div>
+
+      <!-- MAIN BOARD -->
+      <div class="board-wrap">
+        <div class="board-header" id="p1-header">JUGADOR 1</div>
+        <canvas id="p1-canvas" width="300" height="600"></canvas>
+        <div class="board-overlay" id="p1-overlay"></div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="side-panel right-panel">
+        <div class="panel-block">
+          <div class="panel-label">SIGUIENTE</div>
+          <canvas id="p1-next-canvas" width="120" height="360"></canvas>
+        </div>
+        <div class="panel-block">
+          <div class="panel-label">RÉCORD</div>
+          <div class="panel-value record-val" id="p1-record">0</div>
+        </div>
+      </div>
+      <!-- CPU board — solo visible en modo VS CPU -->
+      <div id="cpu-section" class="cpu-section" style="display:none;">
+        <div class="cpu-header">🤖 CPU</div>
+        <canvas id="cpu-canvas" width="200" height="400"></canvas>
+        <div class="cpu-stats">
+          <span id="cpu-level-label">NVL <span id="cpu-level-val">1</span></span>
+          <span id="cpu-lines-label">LNS <span id="cpu-lines-val">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAUSE OVERLAY -->
+    <div id="pause-overlay" class="pause-overlay hidden">
+      <div class="pause-box">
+        <div class="pause-title">PAUSA</div>
+        <button class="nav-btn" id="btn-resume">▶ CONTINUAR</button>
+        <button class="nav-btn" id="btn-quit-game">✕ SALIR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN VERSUS (2 players) -->
+  <div id="screen-versus" class="screen">
+    <div class="scanlines"></div>
+    <div class="game-layout versus-layout">
+
+      <!-- P1 SIDE — WASD (izquierda) -->
+      <div class="versus-side">
+        <div class="side-panel">
+          <div class="panel-block"><div class="panel-label">SCORE</div><div class="panel-value" id="vs-p1-score">0</div></div>
+          <div class="panel-block"><div class="panel-label">NIVEL</div><div class="panel-value" id="vs-p1-level">1</div></div>
+          <div class="panel-block"><div class="panel-label">COMBO</div><div class="panel-value combo-val" id="vs-p1-combo">×1</div></div>
+          <div class="panel-block"><div class="panel-label">SIG.</div><canvas id="vs-p1-next" width="90" height="270"></canvas></div>
+          <div class="panel-block keys-hint">
+            <div class="panel-label">CONTROLES</div>
+            <div class="hint-keys"><kbd>W</kbd> rotar · <kbd>A</kbd><kbd>D</kbd> mover<br><kbd>S</kbd> bajar · <kbd>G</kbd> drop</div>
+          </div>
+        </div>
+        <div class="board-wrap">
+          <div class="board-header p1-header-label">P1 — WASD</div>
+          <canvas id="vs-p1-canvas" width="240" height="480"></canvas>
+          <div class="board-overlay" id="vs-p1-overlay"></div>
+        </div>
+      </div>
+
+      <!-- CENTER INFO -->
+      <div class="versus-center">
+        <div class="vs-badge">VS</div>
+        <div class="vs-wins">
+          <div class="win-block"><div class="win-label">P1 WINS</div><div class="win-val" id="vs-p1-wins">0</div></div>
+          <div class="win-block"><div class="win-label">P2 WINS</div><div class="win-val" id="vs-p2-wins">0</div></div>
+        </div>
+        <button class="nav-btn small-btn" id="btn-vs-quit">SALIR</button>
+      </div>
+
+      <!-- P2 SIDE — Flechas (derecha) -->
+      <div class="versus-side">
+        <div class="board-wrap">
+          <div class="board-header p2-header-label">P2 — FLECHAS</div>
+          <canvas id="vs-p2-canvas" width="240" height="480"></canvas>
+          <div class="board-overlay" id="vs-p2-overlay"></div>
+        </div>
+        <div class="side-panel">
+          <div class="panel-block"><div class="panel-label">SCORE</div><div class="panel-value" id="vs-p2-score">0</div></div>
+          <div class="panel-block"><div class="panel-label">NIVEL</div><div class="panel-value" id="vs-p2-level">1</div></div>
+          <div class="panel-block"><div class="panel-label">COMBO</div><div class="panel-value combo-val" id="vs-p2-combo">×1</div></div>
+          <div class="panel-block"><div class="panel-label">SIG.</div><canvas id="vs-p2-next" width="90" height="270"></canvas></div>
+          <div class="panel-block keys-hint">
+            <div class="panel-label">CONTROLES</div>
+            <div class="hint-keys"><kbd>↑</kbd> rotar · <kbd>←</kbd><kbd>→</kbd> mover<br><kbd>↓</kbd> bajar · <kbd>K</kbd> drop</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="screen-gameover" class="screen">
+    <div class="scanlines"></div>
+    <div class="gameover-container">
+      <div class="go-title" id="go-title">GAME OVER</div>
+      <div class="go-results" id="go-results"></div>
+      <div class="go-name-wrap" id="go-name-wrap">
+        <label>INGRESA TU NOMBRE:</label>
+        <input type="text" id="go-name-input" maxlength="12" placeholder="PLAYER">
+      </div>
+      <div class="go-buttons">
+        <button class="nav-btn" id="btn-go-save">💾 GUARDAR</button>
+        <button class="nav-btn" id="btn-go-retry">↺ REINTENTAR</button>
+        <button class="nav-btn" id="btn-go-menu">⌂ MENÚ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="js/audioManager.js"></script>
+  <script src="js/scoreManager.js"></script>
+  <script src="js/piece.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/levelManager.js"></script>
+  <script src="js/aiController.js"></script>
+  <script src="js/inputHandler.js"></script>
+  <script src="js/uiManager.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

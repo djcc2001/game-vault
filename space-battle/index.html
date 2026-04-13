@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Space Battle Arena Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ===================== CANVAS ===================== -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- ===================== OVERLAY UI ===================== -->
+  <div id="ui-overlay">
+
+    <!-- MAIN MENU -->
+    <div id="screen-main-menu" class="screen active">
+      <div class="stars-bg"></div>
+      <div class="menu-container">
+        <div class="logo-wrapper">
+          <div class="logo-glow"></div>
+          <h1 class="logo-title">SPACE<br><span>BATTLE</span><br>ARENA</h1>
+          <div class="logo-sub">PRO EDITION</div>
+        </div>
+        <nav class="main-nav">
+          <button class="btn-menu btn-primary" data-action="goto-mode-select">▶ JUGAR</button>
+          <button class="btn-menu" data-action="goto-instructions">📋 INSTRUCCIONES</button>
+          <button class="btn-menu" data-action="goto-ranking">🏆 RANKING</button>
+        </nav>
+        <div class="version-tag">v1.0 · Canvas Edition</div>
+      </div>
+    </div>
+
+    <!-- MODE SELECT -->
+    <div id="screen-mode-select" class="screen">
+      <div class="screen-inner">
+        <h2 class="screen-title">SELECCIONAR MODO</h2>
+        <div class="mode-grid">
+          <button class="btn-mode" data-mode="single">
+            <div class="mode-icon">🚀</div>
+            <div class="mode-label">1 JUGADOR</div>
+            <div class="mode-desc">Batalla solitaria contra oleadas enemigas</div>
+          </button>
+          <button class="btn-mode" data-mode="two-player">
+            <div class="mode-icon">🚀🚀</div>
+            <div class="mode-label">2 JUGADORES</div>
+            <div class="mode-desc">Co-op local – ambos contra la IA</div>
+          </button>
+          <button class="btn-mode" data-mode="vs-cpu">
+            <div class="mode-icon">🤖</div>
+            <div class="mode-label">VS CPU</div>
+            <div class="mode-desc">Jugador vs nave controlada por IA</div>
+          </button>
+        </div>
+        <button class="btn-back" data-action="goto-main-menu">← VOLVER</button>
+      </div>
+    </div>
+
+    <!-- INSTRUCTIONS -->
+    <div id="screen-instructions" class="screen">
+      <div class="screen-inner scrollable">
+        <h2 class="screen-title">INSTRUCCIONES</h2>
+        <div class="instructions-grid">
+          <div class="instr-card">
+            <h3>🚀 JUGADOR 1</h3>
+            <ul>
+              <li><kbd>W A S D</kbd> — Mover nave</li>
+              <li><kbd>Espacio</kbd> — Disparar</li>
+              <li><kbd>Q</kbd> — Misil especial</li>
+            </ul>
+          </div>
+          <div class="instr-card">
+            <h3>🛸 JUGADOR 2</h3>
+            <ul>
+              <li><kbd>↑ ↓ ← →</kbd> — Mover nave</li>
+              <li><kbd>Ctrl Der.</kbd> — Disparar</li>
+              <li><kbd>Shift Der.</kbd> — Misil especial</li>
+            </ul>
+          </div>
+          <div class="instr-card">
+            <h3>🎯 OBJETIVOS</h3>
+            <ul>
+              <li>Elimina oleadas enemigas</li>
+              <li>5 niveles progresivos</li>
+              <li>Jefe final en Nivel 5</li>
+              <li>No pierdas todas las vidas</li>
+            </ul>
+          </div>
+          <div class="instr-card">
+            <h3>⭐ PUNTUACIÓN</h3>
+            <ul>
+              <li>Enemigo básico: 100 pts</li>
+              <li>Enemigo rápido: 200 pts</li>
+              <li>Jefe final: 5000 pts</li>
+              <li>Bonus por nivel: x2 </li>
+            </ul>
+          </div>
+        </div>
+        <button class="btn-back" data-action="goto-main-menu">← VOLVER</button>
+      </div>
+    </div>
+
+    <!-- RANKING -->
+    <div id="screen-ranking" class="screen">
+      <div class="screen-inner">
+        <h2 class="screen-title">🏆 TOP 10</h2>
+        <div id="ranking-list" class="ranking-list"></div>
+        <button class="btn-back" data-action="goto-main-menu">← VOLVER</button>
+      </div>
+    </div>
+
+    <!-- HUD (during gameplay) -->
+    <div id="screen-hud" class="screen hud-screen">
+      <div class="hud-top">
+        <div class="hud-player" id="hud-p1">
+          <span class="hud-label">P1</span>
+          <div class="hud-health-bar"><div id="hud-p1-health" class="hud-health-fill"></div></div>
+          <span id="hud-p1-score" class="hud-score">0</span>
+        </div>
+        <div class="hud-center">
+          <div class="hud-level-info">
+            <span class="hud-level-label">NIVEL</span>
+            <span id="hud-level" class="hud-level-val">1</span>
+          </div>
+          <button id="btn-pause" class="btn-pause">⏸</button>
+        </div>
+        <div class="hud-player" id="hud-p2" style="display:none;">
+          <span class="hud-label">P2</span>
+          <div class="hud-health-bar"><div id="hud-p2-health" class="hud-health-fill p2"></div></div>
+          <span id="hud-p2-score" class="hud-score">0</span>
+        </div>
+      </div>
+      <div id="hud-boss-bar" class="boss-bar-wrapper" style="display:none;">
+        <div class="boss-bar-label">JEFE FINAL</div>
+        <div class="boss-bar-track"><div id="hud-boss-health" class="boss-bar-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- PAUSE -->
+    <div id="screen-pause" class="screen">
+      <div class="screen-inner">
+        <h2 class="screen-title">— PAUSA —</h2>
+        <button class="btn-menu btn-primary" data-action="resume">▶ CONTINUAR</button>
+        <button class="btn-menu" data-action="restart">↺ REINICIAR</button>
+        <button class="btn-menu" data-action="goto-main-menu">⏏ MENÚ PRINCIPAL</button>
+      </div>
+    </div>
+
+    <!-- LEVEL UP BANNER (transient) -->
+    <div id="screen-levelup" class="screen" style="pointer-events:none;">
+      <div class="levelup-banner">
+        <div class="levelup-text" id="levelup-text">NIVEL 2</div>
+        <div class="levelup-sub">¡SIGUIENTE OLEADA!</div>
+      </div>
+    </div>
+
+    <!-- SCORE WARNING -->
+    <div id="score-warning" class="score-warning">¡PUNTUACIÓN MÍNIMA REQUERIDA!</div>
+
+    <!-- GAME OVER -->
+    <div id="screen-gameover" class="screen">
+      <div class="screen-inner">
+        <h2 class="screen-title gameover-title">GAME OVER</h2>
+        <div class="result-stats" id="gameover-stats"></div>
+        <div class="name-entry" id="name-entry-area">
+          <label>INGRESA TU NOMBRE:</label>
+          <input type="text" id="player-name-input" maxlength="12" placeholder="COMANDANTE" />
+          <button class="btn-menu btn-primary" data-action="save-score">💾 GUARDAR</button>
+        </div>
+        <button class="btn-menu" data-action="restart">↺ JUGAR DE NUEVO</button>
+        <button class="btn-menu" data-action="goto-main-menu">⏏ MENÚ PRINCIPAL</button>
+      </div>
+    </div>
+
+    <!-- VICTORY -->
+    <div id="screen-victory" class="screen">
+      <div class="screen-inner">
+        <h2 class="screen-title victory-title">¡VICTORIA!</h2>
+        <div class="victory-stars">★★★★★</div>
+        <div class="result-stats" id="victory-stats"></div>
+        <div class="name-entry" id="victory-name-entry">
+          <label>INGRESA TU NOMBRE:</label>
+          <input type="text" id="victory-name-input" maxlength="12" placeholder="HÉROE GALÁCTICO" />
+          <button class="btn-menu btn-primary" data-action="save-score-victory">💾 GUARDAR</button>
+        </div>
+        <button class="btn-menu" data-action="restart">↺ JUGAR DE NUEVO</button>
+        <button class="btn-menu" data-action="goto-main-menu">⏏ MENÚ PRINCIPAL</button>
+      </div>
+    </div>
+
+  </div><!-- /ui-overlay -->
+
+  <!-- Scripts -->
+  <script src="js/inputHandler.js"></script>
+  <script src="js/audioManager.js"></script>
+  <script src="js/scoreManager.js"></script>
+  <script src="js/projectile.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/aiController.js"></script>
+  <script src="js/collision.js"></script>
+  <script src="js/levelManager.js"></script>
+  <script src="js/uiManager.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

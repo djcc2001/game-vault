@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5 en Raya Clásico</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- MAIN MENU -->
+    <div id="screen-menu" class="screen active">
+      <div class="bg-grid"></div>
+      <div class="scanlines"></div>
+      <div class="menu-container">
+        <div class="logo-block">
+          <div class="logo-pre">CLÁSICO</div>
+          <h1 class="logo-title">5 EN RAYA</h1>
+          <div class="logo-sub">Tablero 15×15 · Estilo tradicional</div>
+        </div>
+        <nav class="main-nav">
+          <button class="nav-btn" id="btn-play">▶ JUGAR</button>
+          <button class="nav-btn" id="btn-instructions">◈ INSTRUCCIONES</button>
+          <button class="nav-btn" id="btn-ranking">◆ RANKING</button>
+        </nav>
+        <div class="menu-footer">Tablero 15×15 · IA Minimax</div>
+      </div>
+    </div>
+
+    <!-- MODE SELECTION -->
+    <div id="screen-mode" class="screen">
+      <div class="bg-grid"></div>
+      <div class="scanlines"></div>
+      <div class="menu-container">
+        <h2 class="section-title">SELECCIÓN DE MODO</h2>
+        <div class="mode-cards">
+          <div class="mode-card" id="mode-pvp">
+            <div class="mode-icon">⚔</div>
+            <div class="mode-name">JUGADOR vs JUGADOR</div>
+            <div class="mode-desc">Desafía a un amigo en el mismo equipo</div>
+          </div>
+          <div class="mode-card" id="mode-pvc">
+            <div class="mode-icon">◈</div>
+            <div class="mode-name">JUGADOR vs CPU</div>
+            <div class="mode-desc">Enfrenta a la inteligencia artificial</div>
+            <div class="difficulty-selector">
+              <span>DIFICULTAD:</span>
+              <button class="diff-btn active" data-diff="easy">FÁCIL</button>
+              <button class="diff-btn" data-diff="medium">MEDIO</button>
+              <button class="diff-btn" data-diff="hard">DIFÍCIL</button>
+            </div>
+          </div>
+        </div>
+        <div class="name-inputs">
+          <div class="input-group">
+            <label>JUGADOR 1 (⚫)</label>
+            <input type="text" id="p1-name" maxlength="12" placeholder="Tu nombre" />
+          </div>
+          <div class="input-group" id="p2-input-group">
+            <label>JUGADOR 2 (⚪)</label>
+            <input type="text" id="p2-name" maxlength="12" placeholder="Nombre" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="nav-btn secondary" id="btn-back-menu">◀ VOLVER</button>
+          <button class="nav-btn" id="btn-start-game">INICIAR PARTIDA ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+      <div class="game-layout">
+        <header class="game-header">
+          <button class="icon-btn" id="btn-pause" title="Pausa">❚❚</button>
+          <div class="turn-display">
+            <span class="turn-stone" id="turn-stone">⚫</span>
+            <span class="turn-name" id="turn-name">Jugador 1</span>
+            <span class="turn-label">EN TURNO</span>
+          </div>
+          <button class="icon-btn" id="btn-sound" title="Sonido">♪</button>
+        </header>
+        <div class="canvas-wrapper">
+          <canvas id="game-canvas"></canvas>
+          <div id="pause-overlay" class="hidden">
+            <div class="pause-container">
+              <h2 class="pause-title">PAUSA</h2>
+              <div class="pause-options">
+                <button class="pause-btn" id="btn-pause-restart">
+                  <span class="pause-icon">↺</span>
+                  <span>REINICIAR</span>
+                </button>
+                <button class="pause-btn" id="btn-pause-resume">
+                  <span class="pause-icon">▶</span>
+                  <span>CONTINUAR</span>
+                </button>
+                <button class="pause-btn" id="btn-pause-exit">
+                  <span class="pause-icon">⌂</span>
+                  <span>SALIR AL MENÚ</span>
+                </button>
+              </div>
+              <div class="pause-hint">Presiona ESC para continuar</div>
+            </div>
+          </div>
+        </div>
+        <footer class="game-footer">
+          <div class="player-info" id="info-p1">
+            <span class="pstone">⚫</span>
+            <span class="pname" id="footer-p1-name">P1</span>
+          </div>
+          <div class="move-counter">TURNO <span id="move-count">1</span></div>
+          <div class="player-info" id="info-p2">
+            <span class="thinking-label hidden" id="thinking-label">IA PENSANDO<span class="dots">...</span></span>
+            <span class="pname" id="footer-p2-name">P2</span>
+            <span class="pstone">⚪</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- INSTRUCTIONS -->
+    <div id="screen-instructions" class="screen">
+      <div class="bg-grid"></div>
+      <div class="scanlines"></div>
+      <div class="menu-container wide">
+        <h2 class="section-title">INSTRUCCIONES</h2>
+        <div class="instructions-grid">
+          <div class="inst-card">
+            <div class="inst-icon">⬡</div>
+            <h3>OBJETIVO</h3>
+            <p>Coloca 5 fichas consecutivas en línea: horizontal, vertical o diagonal. El primero en lograrlo gana.</p>
+          </div>
+          <div class="inst-card">
+            <div class="inst-icon">⚫</div>
+            <h3>JUGADORES</h3>
+            <p>Las fichas negras siempre comienzan. Cada jugador coloca una ficha por turno en cualquier celda libre.</p>
+          </div>
+          <div class="inst-card">
+            <div class="inst-icon">◈</div>
+            <h3>TABLERO</h3>
+            <p>El tablero es de 15×15 intersecciones. Las combinaciones ganadoras se resaltan al final de la partida.</p>
+          </div>
+          <div class="inst-card">
+            <div class="inst-icon">▲</div>
+            <h3>IA MINIMAX</h3>
+            <p>La CPU usa algoritmo Minimax con poda alfa-beta. Nivel difícil es un oponente formidable.</p>
+          </div>
+        </div>
+        <button class="nav-btn" id="btn-back-inst">◀ VOLVER</button>
+      </div>
+    </div>
+
+    <!-- RANKING -->
+    <div id="screen-ranking" class="screen">
+      <div class="bg-grid"></div>
+      <div class="scanlines"></div>
+      <div class="menu-container wide">
+        <h2 class="section-title">⬡ RANKING GLOBAL</h2>
+        <div id="ranking-list" class="ranking-list"></div>
+        <div class="btn-row">
+          <button class="nav-btn secondary" id="btn-clear-ranking">✕ BORRAR</button>
+          <button class="nav-btn" id="btn-back-rank">◀ VOLVER</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VICTORY -->
+    <div id="screen-victory" class="screen">
+      <div class="bg-grid"></div>
+      <div class="scanlines"></div>
+      <div class="victory-container">
+        <div class="victory-particles" id="victory-particles"></div>
+        <div class="trophy">⬡</div>
+        <div class="victory-label">VICTORIA</div>
+        <div class="winner-name" id="winner-name">JUGADOR 1</div>
+        <div class="victory-stats" id="victory-stats"></div>
+        <div class="btn-row">
+          <button class="nav-btn" id="btn-play-again">↺ REVANCHA</button>
+          <button class="nav-btn secondary" id="btn-victory-menu">⌂ MENÚ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

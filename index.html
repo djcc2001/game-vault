@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Vault</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c1: #0ff;
+      --c2: #f0f;
+      --c3: #ff0;
+      --bg: #050510;
+      --card-bg: rgba(255,255,255,0.03);
+      --card-border: rgba(0,255,255,0.15);
+    }
+
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── scanline overlay ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.07) 2px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── secret button ── */
+    #secret-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+    }
+    #secret-btn:hover {
+      border-color: rgba(0,255,255,0.4);
+      background: rgba(0,255,255,0.06);
+      box-shadow: 0 0 12px rgba(0,255,255,0.2);
+    }
+    #secret-btn svg {
+      opacity: 0.25;
+      transition: opacity 0.3s;
+    }
+    #secret-btn:hover svg { opacity: 0.9; }
+    #secret-btn.active {
+      border-color: rgba(255,0,255,0.6);
+      background: rgba(255,0,255,0.08);
+      box-shadow: 0 0 18px rgba(255,0,255,0.3);
+    }
+    #secret-btn.active svg { opacity: 1; fill: #f0f; }
+
+    /* ── wrapper ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* ── header ── */
+    header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .logo-tag {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--c1);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+    .subtitle {
+      margin-top: 14px;
+      font-size: 15px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 2px;
+    }
+
+    /* ── section label ── */
+    .section-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* ── grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px var(--glow);
+      border-color: var(--accent);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card:hover::before { opacity: 0.05; }
+
+    /* thumbnail area */
+    .thumb {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      position: relative;
+      overflow: hidden;
+      background: var(--thumb-bg);
+    }
+    .thumb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, var(--bg) 100%);
+    }
+
+    /* card body */
+    .card-body {
+      padding: 18px 20px 22px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .game-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .game-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .play-btn {
+      margin-top: 12px;
+      padding: 10px 0;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-align: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .card:hover .play-btn {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* secret section */
+    #secret-section {
+      margin-top: 48px;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+    }
+    #secret-section.open {
+      max-height: 800px;
+      opacity: 1;
+    }
+
+    /* unlock banner */
+    .unlock-banner {
+      border: 1px solid rgba(255,0,255,0.2);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      background: rgba(255,0,255,0.04);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: rgba(255,0,255,0.7);
+      letter-spacing: 1px;
+    }
+    .unlock-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #f0f;
+      box-shadow: 0 0 8px #f0f;
+      flex-shrink: 0;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* footer */
+    footer {
+      margin-top: 80px;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.1);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Secret button top-left -->
+  <button id="secret-btn" title="???">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 15a1 1 0 110-2 1 1 0 010 2zm1-4.5a1 1 0 01-2 0V8a1 1 0 012 0v4.5z"/>
+    </svg>
+  </button>
+
+  <div class="wrapper">
+
+    <header>
+      <h1>ARCADE<br/>HUB</h1>
+      <p class="subtitle">SELECCIONA TU JUEGO &mdash; ENTRA A LA ARENA</p>
+    </header>
+
+    <!-- Public games -->
+    <div class="grid" id="public-grid">
+
+      <a class="card" href="space-battle/index.html"
+         style="--accent:#0ff; --glow:rgba(0,255,255,0.25); --thumb-bg:linear-gradient(135deg,#001a2e,#003a5c);">
+        <div class="thumb">&#x1F680;</div>
+        <div class="card-body">
+          <p class="game-title">Space Battle</p>
+          <p class="game-desc">Sobrevive oleadas de enemigos en el vacío del espacio. Reflejos al máximo.</p>
+          <div class="play-btn">JUGAR</div>
+        </div>
+      </a>
+
+      <a class="card" href="tank-battle/index.html"
+         style="--accent:#ff0; --glow:rgba(255,220,0,0.25); --thumb-bg:linear-gradient(135deg,#1a1200,#3a2d00);">
+        <div class="thumb">&#x1F6E1;&#xFE0F;</div>
+        <div class="card-body">
+          <p class="game-title">Tank Battle</p>
+          <p class="game-desc">Estrategia y fuego. Comanda tu tanque y destruye a tus rivales.</p>
+          <div class="play-btn">JUGAR</div>
+        </div>
+      </a>
+
+      <a class="card" href="tetris-ultimate-pro/index.html"
+         style="--accent:#f0f; --glow:rgba(255,0,255,0.25); --thumb-bg:linear-gradient(135deg,#1a0020,#3a0050);">
+        <div class="thumb">&#x1F9E9;</div>
+        <div class="card-body">
+          <p class="game-title">Tetris Ultimate Pro</p>
+          <p class="game-desc">El clásico llevado al límite. Bloques, velocidad y concentración pura.</p>
+          <div class="play-btn">JUGAR</div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Secret / hidden section -->
+    <div id="secret-section">
+      <div class="unlock-banner">
+        <span class="unlock-dot"></span>
+        MODO DESARROLLADOR ACTIVADO &mdash; TODOS LOS JUEGOS DESBLOQUEADOS
+      </div>
+      <div class="grid">
+
+        <a class="card" href="5-en-raya/index.html"
+           style="--accent:#0f0; --glow:rgba(0,255,100,0.25); --thumb-bg:linear-gradient(135deg,#001a08,#003a14);">
+          <div class="thumb">&#x2B55;</div>
+          <div class="card-body">
+            <p class="game-title">5 en Raya</p>
+            <p class="game-desc">El clásico de estrategia. Consigue cinco en línea antes que tu rival.</p>
+            <div class="play-btn">JUGAR</div>
+          </div>
+        </a>
+
+        <a class="card" href="stickman-fight/index.html"
+           style="--accent:#f80; --glow:rgba(255,140,0,0.25); --thumb-bg:linear-gradient(135deg,#1a0800,#3a1800);">
+          <div class="thumb">
+            <svg width="80" height="110" viewBox="0 0 80 110" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:1;">
+              <!-- cabeza -->
+              <circle cx="40" cy="18" r="12" stroke="#f80" stroke-width="3" fill="none"/>
+              <!-- cuerpo -->
+              <line x1="40" y1="30" x2="40" y2="68" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <!-- brazo izq: levantado en gancho -->
+              <line x1="40" y1="42" x2="18" y2="30" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <line x1="18" y1="30" x2="10" y2="44" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <!-- brazo der: extendido pegando -->
+              <line x1="40" y1="42" x2="66" y2="38" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <line x1="66" y1="38" x2="76" y2="50" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <!-- pierna izq -->
+              <line x1="40" y1="68" x2="22" y2="95" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <!-- pierna der: levantada dando patada -->
+              <line x1="40" y1="68" x2="58" y2="80" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <line x1="58" y1="80" x2="74" y2="70" stroke="#f80" stroke-width="3" stroke-linecap="round"/>
+              <!-- efecto impacto -->
+              <line x1="72" y1="44" x2="78" y2="38" stroke="#ff0" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+              <line x1="75" y1="50" x2="80" y2="46" stroke="#ff0" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+          </div>
+          <div class="card-body">
+            <p class="game-title">Stickman Fight</p>
+            <p class="game-desc">Pelea sin cuartel entre stickmen. Combos, golpes y mucha adrenalina.</p>
+            <div class="play-btn">JUGAR</div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <footer>&#9632; &nbsp; Game Vault &nbsp; &#9632;</footer>
+  </div>
+
+  <script>
+    // ── Audio (Web Audio API - synthetic) ──
+    let _audioCtx = null;
+    function _getAudioCtx() {
+      if (!_audioCtx) {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (_audioCtx.state === 'suspended') _audioCtx.resume();
+      return _audioCtx;
+    }
+    function _playHover() {
+      const ctx = _getAudioCtx();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, t);
+      osc.frequency.exponentialRampToValueAtTime(1200, t + 0.08);
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.15);
+    }
+
+    // ── Secret button ──
+    const btn = document.getElementById('secret-btn');
+    const section = document.getElementById('secret-section');
+    let unlocked = false;
+
+    btn.addEventListener('click', () => {
+      unlocked = !unlocked;
+      btn.classList.toggle('active', unlocked);
+      section.classList.toggle('open', unlocked);
+    });
+
+    // ── Card hover sound ──
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mouseenter', () => _playHover());
+    });
+  </script>
+</body>
+</html>

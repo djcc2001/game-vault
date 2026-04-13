@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tank Battle Arena – Retro Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Canvas principal del juego -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Overlay del menú UI (DOM encima del canvas solo para inputs si fuera necesario) -->
+  <div id="ui-overlay"></div>
+
+  <!-- Scripts en orden de dependencia -->
+  <script src="js/audioManager.js"></script>
+  <script src="js/inputHandler.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/collision.js"></script>
+  <script src="js/bullet.js"></script>
+  <script src="js/tank.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/aiController.js"></script>
+  <script src="js/difficultyManager.js"></script>
+  <script src="js/uiManager.js"></script>
+  <script src="js/stateMachine.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
