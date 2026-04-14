@@ -171,39 +171,34 @@ class Game {
       return;
     }
 
-    // ── FACE EACH OTHER ──────────────────────────────────────────
-    // Update facing BEFORE processing attack inputs so punch/kick always
-    // faces the opponent. Only skip when already committed to an action.
-    if (!this.p1.sm.is('attack', 'kick', 'special', 'hit', 'ko')) {
-      this.p1.facingRight = this.p2.pos.x > this.p1.pos.x;
-    }
-    if (!this.p2.sm.is('attack', 'kick', 'special', 'hit', 'ko')) {
-      this.p2.facingRight = this.p1.pos.x > this.p2.pos.x;
-    }
-
     // ── P1 INPUT ──────────────────────────────────────────────
     const p1In = InputHandler.p1();
+
     if (p1In.left)    this.p1.walkLeft(dt);
     if (p1In.right)   this.p1.walkRight(dt);
     if (p1In.jump)    this.p1.jump();
     if (p1In.attack)  this.p1.attack();
     if (p1In.kick)    this.p1.kick();
     if (p1In.special) this.p1.useSpecial(this.projectiles);
+    if (p1In.dash)    this.p1.dash();
     if (p1In.defend)  this.p1.startDefend();
     else              this.p1.stopDefend();
 
     // ── P2 INPUT / AI ─────────────────────────────────────────
+    let p2In;
     if (this.mode === 'pvc' && this.ai) {
       const aiActions = this.ai.update(dt, this.projectiles);
       this.ai.applyActions(aiActions, dt, this.projectiles);
+      p2In = { left: false, right: false };
     } else {
-      const p2In = InputHandler.p2();
+      p2In = InputHandler.p2();
       if (p2In.left)    this.p2.walkLeft(dt);
       if (p2In.right)   this.p2.walkRight(dt);
       if (p2In.jump)    this.p2.jump();
       if (p2In.attack)  this.p2.attack();
       if (p2In.kick)    this.p2.kick();
       if (p2In.special) this.p2.useSpecial(this.projectiles);
+      if (p2In.dash)    this.p2.dash();
       if (p2In.defend)  this.p2.startDefend();
       else              this.p2.stopDefend();
     }
@@ -212,13 +207,26 @@ class Game {
     this.p1.update(dt, this.W, this.particles);
     this.p2.update(dt, this.W, this.particles);
 
+    // ── AUTO-FACE OPPONENT ─────────────────────────────────────
+    // When standing still (not pressing direction), face the opponent.
+    // Don't override facing during attacks - let the attack play out.
+    if (!p1In.left && !p1In.right && !this.p1.sm.is('attack', 'kick', 'special', 'hit', 'ko', 'dash')) {
+      this.p1.facingRight = this.p2.pos.x > this.p1.pos.x;
+    }
+    if (!p2In.left && !p2In.right && !this.p2.sm.is('attack', 'kick', 'special', 'hit', 'ko', 'dash')) {
+      this.p2.facingRight = this.p1.pos.x > this.p2.pos.x;
+    }
+
     // Separate overlapping fighters
-    Collision.separateFighters(this.p1, this.p2);
+    Collision.separateFighters(this.p1, this.p2, this.W);
 
     // ── COLLISION ─────────────────────────────────────────────
-    const p1Hit = Collision.checkMeleeHit(this.p1, this.p2, this.particles);
-    const p2Hit = Collision.checkMeleeHit(this.p2, this.p1, this.particles);
-    if (p1Hit || p2Hit) this._hitstop(0.07);
+    const p1Hit = Collision.checkMeleeHit(this.p1, this.p2, this.particles, this.W);
+    const p2Hit = Collision.checkMeleeHit(this.p2, this.p1, this.particles, this.W);
+    
+    const comboBonus = Math.max(this.p1.comboCount, this.p2.comboCount);
+    const hitstopDur = comboBonus >= 3 ? 0.10 : (comboBonus >= 5 ? 0.13 : 0.07);
+    if (p1Hit || p2Hit) this._hitstop(hitstopDur);
 
     Collision.checkProjectileHits(this.projectiles, [this.p1, this.p2], this.particles);
 

@@ -1,9 +1,8 @@
 /**
- * inputHandler.js — Stickman Fight Legends Pro
+ * inputHandler.js — Stickman Fight Legends Pro TUNED
  *
- * P1:  A/D=move  W=jump  S=defend  G=puño  H=patada  J=especial
- * P2:  ←/→=move  ↑=jump  ↓=defend  7=puño  8=patada  9=especial
- *      (también Numpad 7/8/9)
+ * P1:  A/D=move  W=jump  S=defend  G=puño  H=patada  J=especial  Q=dash
+ * P2:  ←/→=move  ↑=jump  ↓=defend  7=puño  8=patada  9=especial  /=dash
  */
 const InputHandler = (() => {
   const keys = {}, prevKeys = {};
@@ -12,8 +11,10 @@ const InputHandler = (() => {
     window.addEventListener('keydown', e => {
       keys[e.code] = true;
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space',
-           'Digit7','Digit8','Digit9','Numpad7','Numpad8','Numpad9'].includes(e.code)) {
+           'Digit7','Digit8','Digit9','Numpad7','Numpad8','Numpad9',
+           'KeyQ','ControlRight','ShiftRight'].includes(e.code)) {
         e.preventDefault();
+        e.stopPropagation();
       }
       if (e.code === 'Escape') window.dispatchEvent(new CustomEvent('game:togglePause'));
     });
@@ -30,9 +31,10 @@ const InputHandler = (() => {
       right:   isDown('KeyD'),
       jump:    justPressed('KeyW'),
       defend:  isDown('KeyS'),
-      attack:  justPressed('KeyG'),   // puño
-      kick:    justPressed('KeyH'),   // patada
-      special: justPressed('KeyJ'),   // especial
+      attack:  justPressed('KeyG'),
+      kick:    justPressed('KeyH'),
+      special: justPressed('KeyJ'),
+      dash:    justPressed('KeyQ'),
     };
   }
 
@@ -42,9 +44,10 @@ const InputHandler = (() => {
       right:   isDown('ArrowRight'),
       jump:    justPressed('ArrowUp'),
       defend:  isDown('ArrowDown'),
-      attack:  justPressed('Digit7') || justPressed('Numpad7'),  // puño
-      kick:    justPressed('Digit8') || justPressed('Numpad8'),  // patada
-      special: justPressed('Digit9') || justPressed('Numpad9'),  // especial
+      attack:  justPressed('Digit7') || justPressed('Numpad7'),
+      kick:    justPressed('Digit8') || justPressed('Numpad8'),
+      special: justPressed('Digit9') || justPressed('Numpad9'),
+      dash:    justPressed('ControlRight') || justPressed('ShiftRight'),
     };
   }
 

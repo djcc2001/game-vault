@@ -31,7 +31,7 @@
     <div id="screen-mode" class="screen">
       <h2 class="screen-title">Modo de Juego</h2>
       <div class="mode-cards">
-        <div class="mode-card" data-mode="pvp">
+        <div class="mode-card selected" data-mode="pvp">
           <div class="mode-icon">👥</div>
           <h3>Jugador vs Jugador</h3>
           <p>Dos jugadores, una pantalla</p>
@@ -55,9 +55,19 @@
       </div>
 
       <!-- Controls tip -->
-      <div class="mode-tip">
-        <span class="tip-icon">🦘</span>
-        <span><strong>Doble Salto:</strong> Presiona saltar una segunda vez en el aire para impulsarte de nuevo. El segundo salto tiene menos potencia.</span>
+        <div class="mode-tips-wrapper">
+        <div class="mode-tip">
+          <span class="tip-icon">🦘</span>
+          <span><strong>Doble Salto:</strong> Presiona saltar en el aire para impulsarte de nuevo.</span>
+        </div>
+        <div class="mode-tip" style="border-left-color: var(--c-gold);">
+          <span class="tip-icon">💨</span>
+          <span><strong>Dash:</strong> Q (P1) / Ctrl derecho (P2) para evadir ataques.</span>
+        </div>
+        <div class="mode-tip" style="border-left-color: var(--c-accent);">
+          <span class="tip-icon">⚡</span>
+          <span><strong>Combos:</strong> Encadena ataques rapidamente para mas dano!</span>
+        </div>
       </div>
 
       <button class="btn-next" id="btn-mode-next">Siguiente →</button>
@@ -113,6 +123,7 @@
               <div class="instr-row"><span class="instr-label">Moverse</span><span class="instr-keys"><kbd>A</kbd><kbd>D</kbd></span></div>
               <div class="instr-row"><span class="instr-label">Saltar</span><span class="instr-keys"><kbd>W</kbd></span></div>
               <div class="instr-row"><span class="instr-label">Defender</span><span class="instr-keys"><kbd>S</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Dash</span><span class="instr-keys"><kbd>Q</kbd></span></div>
               <div class="instr-divider"></div>
               <div class="instr-row"><span class="instr-label">Puño</span><span class="instr-keys"><kbd>G</kbd></span></div>
               <div class="instr-row"><span class="instr-label">Patada</span><span class="instr-keys"><kbd>H</kbd></span></div>
@@ -129,6 +140,7 @@
               <div class="instr-row"><span class="instr-label">Moverse</span><span class="instr-keys"><kbd>←</kbd><kbd>→</kbd></span></div>
               <div class="instr-row"><span class="instr-label">Saltar</span><span class="instr-keys"><kbd>↑</kbd></span></div>
               <div class="instr-row"><span class="instr-label">Defender</span><span class="instr-keys"><kbd>↓</kbd></span></div>
+              <div class="instr-row"><span class="instr-label">Dash</span><span class="instr-keys"><kbd>/</kbd></span></div>
               <div class="instr-divider"></div>
               <div class="instr-row"><span class="instr-label">Puño</span><span class="instr-keys"><kbd>7</kbd></span></div>
               <div class="instr-row"><span class="instr-label">Patada</span><span class="instr-keys"><kbd>8</kbd></span></div>
@@ -139,9 +151,11 @@
 
         <div class="instr-tips">
           <div class="instr-tip"><span class="tip-icon">🦘</span><span><strong>Doble Salto:</strong> Presiona saltar <em>una segunda vez en el aire</em> para impulsarte de nuevo. Útil para esquivar y cruzar sobre el rival.</span></div>
-          <div class="instr-tip"><span class="tip-icon">🛡</span><span>La <strong>defensa</strong> reduce el daño 60%. No puedes atacar mientras la sostienes.</span></div>
+          <div class="instr-tip"><span class="tip-icon">💨</span><span><strong>Dash:</strong> Movimiento rapido para evadir ataques. Tiene un pequeno cooldown.</span></div>
+          <div class="instr-tip"><span class="tip-icon">🛡</span><span>La <strong>defensa</strong> reduce el daño 65%. Activa una ventana de contraataque.</span></div>
           <div class="instr-tip"><span class="tip-icon">👊</span><span>El <strong>puño</strong> es rápido. La <strong>patada</strong> hace más daño y mayor knockback.</span></div>
           <div class="instr-tip"><span class="tip-icon">⚡</span><span>El <strong>especial</strong> usa la barra de energía. ¡Cooldown de 3 segundos!</span></div>
+          <div class="instr-tip"><span class="tip-icon">🔥</span><span><strong>Combos:</strong> Encadena ataques rapidamente. Cada golpe en combo hace mas dano que el anterior!</span></div>
           <div class="instr-tip"><span class="tip-icon">⏸</span><span>Presiona <kbd>ESC</kbd> para pausar la partida.</span></div>
         </div>
 

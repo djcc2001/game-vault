@@ -117,6 +117,126 @@ class ParticleSystem {
     });
   }
 
+  /** Big hit spark for heavy/combo hits */
+  bigHitSpark(x, y, color = '#ff6600') {
+    this.emit({
+      x, y, count: 24,
+      colors: [color, '#ffffff', '#ffee00', '#ff3300'],
+      speed: 400, speedVar: 180,
+      size: 6, sizeVar: 4,
+      life: 0.5, lifeVar: 0.2,
+      gravity: 600, glow: true,
+    });
+    this.emit({
+      x, y, count: 8,
+      colors: ['#ffffff'],
+      speed: 200, speedVar: 100,
+      size: 3, sizeVar: 2,
+      life: 0.3, lifeVar: 0.1,
+      gravity: 300, glow: true,
+    });
+  }
+
+  /** Air combo hit effect */
+  airHit(x, y, color = '#00ffff') {
+    this.emit({
+      x, y, count: 18,
+      colors: [color, '#ffffff', '#88ffff'],
+      speed: 320, speedVar: 150,
+      angle: -Math.PI / 2,
+      spread: Math.PI * 0.8,
+      size: 5, sizeVar: 3,
+      life: 0.45, lifeVar: 0.15,
+      gravity: 200, glow: true,
+    });
+  }
+
+  /** Air combo burst when landing after air combo */
+  airComboBurst(x, y, color) {
+    this.emit({
+      x, y, count: 30,
+      colors: [color, '#ffffff', '#ffff00'],
+      speed: 280, speedVar: 120,
+      size: 6, sizeVar: 4,
+      life: 0.6, lifeVar: 0.2,
+      gravity: 100, glow: true,
+    });
+    this.emit({
+      x, y, count: 12,
+      colors: ['#ffffff'],
+      speed: 150, speedVar: 80,
+      size: 3, sizeVar: 2,
+      life: 0.4, lifeVar: 0.15,
+      gravity: -50, glow: true,
+    });
+  }
+
+  /** Combo milestone effect */
+  comboEffect(x, y, color) {
+    this.emit({
+      x, y, count: 20,
+      colors: [color, '#ffffff', '#ffff00', '#ff00ff'],
+      speed: 350, speedVar: 150,
+      size: 8, sizeVar: 5,
+      life: 0.7, lifeVar: 0.25,
+      gravity: -100, glow: true,
+      shape: 'star',
+    });
+    this.emit({
+      x, y, count: 10,
+      colors: ['#ffffff'],
+      speed: 200, speedVar: 100,
+      size: 4, sizeVar: 2,
+      life: 0.5, lifeVar: 0.2,
+      gravity: -80, glow: true,
+    });
+  }
+
+  /** Counter attack effect */
+  counterEffect(x, y) {
+    this.emit({
+      x, y, count: 25,
+      colors: ['#ffd700', '#ffffff', '#ff6600'],
+      speed: 380, speedVar: 160,
+      size: 7, sizeVar: 4,
+      life: 0.6, lifeVar: 0.2,
+      gravity: 150, glow: true,
+      shape: 'star',
+    });
+    this.emit({
+      x, y, count: 15,
+      colors: ['#ffffff'],
+      speed: 250, speedVar: 120,
+      size: 4, sizeVar: 2,
+      life: 0.4, lifeVar: 0.15,
+      gravity: 300, glow: true,
+    });
+  }
+
+  /** Dash trail particle */
+  dashTrail(x, y, color) {
+    this.emit({
+      x, y, count: 3,
+      color: color,
+      speed: 20, speedVar: 15,
+      size: 8, sizeVar: 4,
+      life: 0.2, lifeVar: 0.1,
+      gravity: 0, glow: true,
+    });
+  }
+
+  /** Energy trail for special attacks */
+  energyTrail(x, y, color, colors) {
+    this.emit({
+      x, y, count: 2,
+      colors: colors || [color, '#ffffff'],
+      speed: 40, speedVar: 20,
+      size: 5, sizeVar: 3,
+      life: 0.25, lifeVar: 0.1,
+      gravity: 0, glow: true,
+    });
+  }
+
   /**
    * Update all living particles.
    * @param {number} dt

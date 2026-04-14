@@ -282,6 +282,9 @@ const UIManager = (() => {
   }
 
   // ── HUD UPDATES ──────────────────────────────────────────────
+  let lastP1Combo = 0;
+  let lastP2Combo = 0;
+
   function updateHUD(p1, p2, round, timer, mode, p1Rounds, p2Rounds) {
     // Names
     document.getElementById('hud-p1-name').textContent = p1.stats.name;
@@ -317,6 +320,28 @@ const UIManager = (() => {
     const timerEl = document.getElementById('hud-timer');
     timerEl.textContent = Math.ceil(timer);
     timerEl.classList.toggle('urgent', timer <= 10);
+
+    // Combo counters
+    _updateComboDisplay('hud-combo-p1', p1.comboCount, p1.stats.color, p1.isInCombo);
+    _updateComboDisplay('hud-combo-p2', p2.comboCount, p2.stats.color, p2.isInCombo);
+  }
+
+  function _updateComboDisplay(elId, count, color, active) {
+    let el = document.getElementById(elId);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = elId;
+      el.className = 'combo-counter';
+      document.getElementById('hud-overlay').appendChild(el);
+    }
+
+    if (count >= 2 && active) {
+      el.innerHTML = `<span class="combo-count" style="color:${color};text-shadow:0 0 20px ${color}">${count}</span><span class="combo-label">HITS!</span>`;
+      el.classList.add('active');
+      el.classList.toggle('mega', count >= 5);
+    } else {
+      el.classList.remove('active', 'mega');
+    }
   }
 
   // ── ROUND ANNOUNCE ───────────────────────────────────────────

@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       AudioManager.play('tick');
       const screen = btn.closest('.screen').id.replace('screen-', '');
-      // navigate back
       const backMap = {
         'mode':         'main-menu',
         'char-select':  'mode',
@@ -80,10 +79,27 @@ document.addEventListener('DOMContentLoaded', () => {
         'match-over':   'main-menu',
       };
       const dest = backMap[screen] || 'main-menu';
-      if (dest === 'main-menu') _goMainMenu();
-      else UIManager.showScreen(dest);
+      
+      if (dest === 'main-menu') {
+        _goMainMenu();
+      } else if (dest === 'mode') {
+        _refreshModeScreen();
+        UIManager.showScreen(dest);
+      } else {
+        UIManager.showScreen(dest);
+      }
     });
   });
+
+  function _refreshModeScreen() {
+    document.querySelectorAll('.mode-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.mode === AppState.mode);
+    });
+    const diffSection = document.getElementById('difficulty-section');
+    diffSection.classList.toggle('hidden', AppState.mode !== 'pvc');
+    document.getElementById('p2-label').textContent =
+      AppState.mode === 'pvc' ? 'CPU' : 'Jugador 2';
+  }
 
   // ── MODE SELECT ───────────────────────────────────────────────
   document.querySelectorAll('.mode-card').forEach(card => {
@@ -115,6 +131,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mode → Char select
   document.getElementById('btn-mode-next').addEventListener('click', () => {
     AudioManager.play('tick');
+    
+    const p2Label = document.getElementById('p2-label');
+    const p2Pick = document.getElementById('p2-pick');
+    
+    if (AppState.mode === 'pvc') {
+      const cpuChars = CHARACTER_KEYS.filter(k => k !== AppState.p1Char);
+      AppState.p2Char = cpuChars[Math.floor(Math.random() * cpuChars.length)];
+      p2Label.textContent = 'CPU: ' + CHARACTERS[AppState.p2Char].name;
+      p2Pick.style.opacity = '0.6';
+      p2Pick.style.pointerEvents = 'none';
+    } else {
+      p2Label.textContent = 'Jugador 2';
+      p2Pick.style.opacity = '1';
+      p2Pick.style.pointerEvents = 'all';
+    }
+    
     UIManager.buildCharSelect(
       { 1: AppState.p1Char, 2: AppState.p2Char },
       (pNum, key) => {
@@ -128,6 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── CHAR SELECT → ARENA ───────────────────────────────────────
   document.getElementById('btn-to-arena').addEventListener('click', () => {
     AudioManager.play('tick');
+    
+    // CPU character already randomized in btn-mode-next
+    // Just update the display to show which character was selected
+    
     UIManager.buildArenaGrid(AppState.arenaKey, key => { AppState.arenaKey = key; });
     UIManager.showScreen('arena-select');
   });

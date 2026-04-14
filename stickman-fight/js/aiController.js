@@ -1,77 +1,68 @@
 /**
  * aiController.js — Stickman Fight Legends Pro
  *
- * Reactive AI with 3 difficulty levels:
- *
- * EASY   — slow reactions, low aggression, rare defense, never double-jumps,
- *           makes mistakes (misses attacks), doesn't use special well.
- *
- * NORMAL — moderate reaction, balanced aggression, defends sometimes,
- *           occasional double jump, uses special when full.
- *
- * HARD   — fast reactions, high aggression, defends often, uses double jump
- *           aggressively to cross over player, uses special optimally,
- *           presses advantage when player is low HP.
+ * Reactive AI with 3 difficulty levels.
+ * HARD: Uses dash, double jump, defends aggressively, combos.
  */
 
-// Difficulty presets
 const DIFF = {
   easy: {
-    thinkInterval:   0.30,   // slow decisions
-    aggressionBase:  0.30,   // low aggression
+    thinkInterval:   0.35,
+    aggressionBase:  0.40,
     aggressionRand:  0.15,
-    defendVsAtk:     0.12,   // rarely blocks
-    defendVsProj:    0.25,
-    specialRange:    200,    // only uses special when very close
-    retreatThresh:   0.15,   // retreats early
-    retreatChance:   0.35,
-    jumpChanceAppr:  0.004,  // rarely jumps
-    jumpChanceRetr:  0.006,
-    doubleJumpChance:0,      // never double jumps
-    attackMissChance:0.45,   // misses 45% of attack opportunities
-    kickChance:      0.2,    // mostly punches
-    reactDelay:      0.25,   // slow reaction
+    defendVsAtk:     0.30,
+    defendVsProj:    0.50,
+    specialRange:    250,
+    retreatThresh:   0.25,
+    retreatChance:   0.40,
+    jumpChanceAppr:  0.008,
+    jumpChanceRetr:  0.012,
+    doubleJumpChance:0.005,
+    dashChance:      0.008,
+    attackMissChance:0.40,
+    kickChance:      0.25,
+    reactDelay:      0.25,
+    attackBurst:     0.05,
   },
   normal: {
-    thinkInterval:   0.13,
-    aggressionBase:  0.50,
-    aggressionRand:  0.25,
-    defendVsAtk:     0.35,
+    thinkInterval:   0.15,
+    aggressionBase:  0.55,
+    aggressionRand:  0.20,
+    defendVsAtk:     0.50,
     defendVsProj:    0.65,
     specialRange:    400,
-    retreatThresh:   0.30,
-    retreatChance:   0.55,
-    jumpChanceAppr:  0.009,
-    jumpChanceRetr:  0.015,
-    doubleJumpChance:0.003,  // uses double jump occasionally
-    attackMissChance:0.15,
-    kickChance:      0.45,
+    retreatThresh:   0.35,
+    retreatChance:   0.40,
+    jumpChanceAppr:  0.015,
+    jumpChanceRetr:  0.020,
+    doubleJumpChance:0.010,
+    dashChance:      0.015,
+    attackMissChance:0.12,
+    kickChance:      0.40,
     reactDelay:      0.10,
+    attackBurst:     0.12,
   },
   hard: {
-    thinkInterval:   0.06,   // very fast decisions
-    aggressionBase:  0.78,
-    aggressionRand:  0.20,
-    defendVsAtk:     0.70,   // blocks most attacks
+    thinkInterval:   0.06,
+    aggressionBase:  0.85,
+    aggressionRand:  0.15,
+    defendVsAtk:     0.80,
     defendVsProj:    0.90,
-    specialRange:    500,
-    retreatThresh:   0.30,
-    retreatChance:   0.45,   // less retreat — more aggressive
-    jumpChanceAppr:  0.012,
-    jumpChanceRetr:  0.020,
-    doubleJumpChance:0.010,  // uses double jump to cross over player
+    specialRange:    550,
+    retreatThresh:   0.20,
+    retreatChance:   0.25,
+    jumpChanceAppr:  0.025,
+    jumpChanceRetr:  0.030,
+    doubleJumpChance:0.020,
+    dashChance:      0.025,
     attackMissChance:0.03,
     kickChance:      0.50,
     reactDelay:      0.03,
+    attackBurst:     0.20,
   },
 };
 
 class AIController {
-  /**
-   * @param {Fighter} self
-   * @param {Fighter} opponent
-   * @param {string}  difficulty  'easy' | 'normal' | 'hard'
-   */
   constructor(self, opponent, difficulty = 'normal') {
     this.self     = self;
     this.opponent = opponent;
@@ -82,16 +73,13 @@ class AIController {
     this.jumpCooldown   = 0;
     this.retreatTimer   = 0;
     this.reactDelay     = 0;
-    this.doubleJumpUsed = false; // track within a single air session
+    this.doubleJumpUsed = false;
+    this.actionCooldown = 0;
 
     this.intent = 'approach';
-    // Randomise aggression within preset range
     this.aggressionBias = this.cfg.aggressionBase + Math.random() * this.cfg.aggressionRand;
   }
 
-  /**
-   * Called every frame. Returns action object.
-   */
   update(dt, pm) {
     const self = this.self;
     const opp  = this.opponent;
@@ -100,99 +88,115 @@ class AIController {
     const actions = {
       left: false, right: false,
       jump: false, defend: false,
-      attack: false, kick: false, special: false,
+      attack: false, kick: false, special: false, dash: false,
     };
 
     if (self.sm.is('ko', 'hit')) return actions;
 
-    // Cooldowns
     this.thinkTimer   -= dt;
     this.jumpCooldown  = Math.max(0, this.jumpCooldown - dt);
     this.reactDelay    = Math.max(0, this.reactDelay - dt);
+    this.actionCooldown = Math.max(0, this.actionCooldown - dt);
 
-    // Reset double-jump tracker when grounded
     if (self.grounded) this.doubleJumpUsed = false;
 
-    // Perception
     const dx          = opp.pos.x - self.pos.x;
     const dist        = Math.abs(dx);
     const facingOpp   = (dx > 0) === self.facingRight;
-    const attackRange = self.stats.reach + 40;
-    const dangerRange = attackRange * 1.5;
+    const attackRange = self.stats.reach + 50;
+    const dangerRange = attackRange * 1.4;
     const projDanger  = this._incomingProjectileDanger(pm);
     const oppAttacking= opp.sm.is('attack', 'kick', 'special');
     const lowHP       = self.hp < self.maxHp * cfg.retreatThresh;
     const energyFull  = self.energy >= self.maxEnergy && self.specialCooldown === 0;
-    const oppLowHP    = opp.hp < opp.maxHp * 0.3; // press advantage on hard
+    const oppLowHP    = opp.hp < opp.maxHp * 0.35;
 
-    // ── DECIDE INTENT ──────────────────────────────────────────
     if (this.thinkTimer <= 0) {
-      this.thinkTimer = cfg.thinkInterval + Math.random() * cfg.thinkInterval * 0.4;
+      this.thinkTimer = cfg.thinkInterval + Math.random() * cfg.thinkInterval * 0.3;
       this._decideIntent(dist, attackRange, dangerRange, oppAttacking,
                          lowHP, energyFull, projDanger, oppLowHP);
     }
 
-    // ── DEFEND vs projectile ───────────────────────────────────
-    if (projDanger && self.grounded && this.reactDelay <= 0) {
-      if (Math.random() < cfg.defendVsProj) {
-        actions.defend = true;
-        return actions;
-      }
-    }
+    if (this.actionCooldown > 0) return actions;
 
-    // ── DEFEND vs incoming melee ───────────────────────────────
-    if (oppAttacking && dist < dangerRange && self.grounded && this.reactDelay <= 0) {
-      if (Math.random() < cfg.defendVsAtk) {
-        actions.defend = true;
-        return actions;
-      }
-    }
-
-    // ── SPECIAL ───────────────────────────────────────────────
-    if (this.intent === 'special') {
-      actions.special = true;
+    if (projDanger && self.grounded && Math.random() < cfg.defendVsProj * 1.5) {
+      actions.defend = true;
+      this.reactDelay = cfg.reactDelay;
+      this.actionCooldown = 0.1;
       return actions;
     }
 
-    // ── DOUBLE JUMP (hard/normal only) ─────────────────────────
-    // Use double jump to leap over the opponent when very close and airborne
+    if (oppAttacking && dist < dangerRange && self.grounded && Math.random() < cfg.defendVsAtk * 1.5) {
+      actions.defend = true;
+      this.reactDelay = cfg.reactDelay;
+      this.actionCooldown = 0.08;
+      return actions;
+    }
+
+    if (energyFull && dist < cfg.specialRange && Math.random() < 0.7) {
+      actions.special = true;
+      this.actionCooldown = 0.15;
+      return actions;
+    }
+
     if (!self.grounded && !this.doubleJumpUsed && self.jumpsLeft > 0) {
-      if (Math.random() < cfg.doubleJumpChance && dist < attackRange * 1.3) {
+      if (Math.random() < cfg.doubleJumpChance * 3) {
         actions.jump = true;
         this.doubleJumpUsed = true;
+        this.actionCooldown = 0.05;
         return actions;
       }
     }
 
-    // ── EXECUTE INTENT ────────────────────────────────────────
-    switch (this.intent) {
+    if (self.grounded && self.dashCooldown <= 0 && Math.random() < cfg.dashChance * 2) {
+      if (dist < attackRange * 1.2) {
+        actions.dash = true;
+        this.actionCooldown = 0.1;
+        return actions;
+      }
+    }
 
+    switch (this.intent) {
       case 'approach':
-        if (dx > 0) actions.right = true;
-        else        actions.left  = true;
+        if (dist > attackRange * 0.8) {
+          if (dx > 0) actions.right = true;
+          else        actions.left  = true;
+        }
+        if (dist <= attackRange && facingOpp && Math.random() > cfg.attackMissChance) {
+          if (Math.random() < cfg.kickChance) actions.kick = true;
+          else                                actions.attack = true;
+          this.actionCooldown = 0.12;
+        }
         if (this.jumpCooldown <= 0 && Math.random() < cfg.jumpChanceAppr) {
           actions.jump = true;
-          this.jumpCooldown = 1.5 + Math.random() * 2;
+          this.jumpCooldown = 0.8 + Math.random() * 1.0;
+          this.actionCooldown = 0.05;
         }
         break;
 
       case 'attack':
-        // Close the gap
-        if (dist > attackRange * 0.85) {
+        if (dist > attackRange * 0.7) {
           if (dx > 0) actions.right = true;
           else        actions.left  = true;
         }
-        // Strike — easy AI misses more
+        
         if (dist <= attackRange && facingOpp && Math.random() > cfg.attackMissChance) {
-          if (Math.random() < cfg.kickChance) actions.kick   = true;
+          if (Math.random() < cfg.kickChance) actions.kick = true;
           else                                actions.attack = true;
+          this.actionCooldown = 0.10;
         }
-        // Hard: press harder when opponent is low HP
-        if (this.difficulty === 'hard' && oppLowHP && dist <= dangerRange) {
-          if (Math.random() < 0.3) {
-            if (Math.random() < 0.5) actions.attack = true;
-            else                     actions.kick   = true;
+        
+        if (oppLowHP && dist <= attackRange * 1.2) {
+          if (Math.random() < cfg.attackBurst) {
+            if (Math.random() < cfg.kickChance) actions.kick = true;
+            else                                actions.attack = true;
+            this.actionCooldown = 0.08;
           }
+        }
+        
+        if (dist < attackRange * 0.5 && Math.random() < 0.3) {
+          actions.dash = true;
+          this.actionCooldown = 0.12;
         }
         break;
 
@@ -201,7 +205,8 @@ class AIController {
         else        actions.right = true;
         if (this.jumpCooldown <= 0 && Math.random() < cfg.jumpChanceRetr) {
           actions.jump = true;
-          this.jumpCooldown = 1.0 + Math.random() * 1.5;
+          this.jumpCooldown = 0.6 + Math.random() * 1.0;
+          this.actionCooldown = 0.05;
         }
         break;
 
@@ -219,34 +224,24 @@ class AIController {
                 lowHP, energyFull, projDanger, oppLowHP) {
     const cfg = this.cfg;
 
-    // Special
     if (energyFull && dist < cfg.specialRange) {
       this.intent = 'special';
       return;
     }
 
-    // Retreat when low HP
     if (lowHP && Math.random() < cfg.retreatChance) {
       this.intent = 'retreat';
-      this.retreatTimer = 0.7 + Math.random() * 0.6;
+      this.retreatTimer = 0.4 + Math.random() * 0.4;
       return;
     }
 
-    // Hard: never retreat when opponent is also low
-    if (this.difficulty === 'hard' && oppLowHP) {
-      this.intent = 'attack';
-      return;
-    }
-
-    // Defend vs incoming
-    if (oppAttacking && dist < dangerRange && Math.random() < cfg.defendVsAtk * 0.8) {
+    if (oppAttacking && dist < dangerRange * 0.8 && Math.random() < cfg.defendVsAtk) {
       this.intent = 'defend';
-      this.retreatTimer = 0.3 + Math.random() * 0.3;
+      this.retreatTimer = 0.15 + Math.random() * 0.15;
       return;
     }
 
-    // Attack
-    if (dist <= dangerRange && Math.random() < this.aggressionBias) {
+    if (dist <= dangerRange * 1.2) {
       this.intent = 'attack';
       return;
     }
@@ -260,7 +255,7 @@ class AIController {
       if (p.ownerId === self.id) continue;
       const dx = self.pos.x - p.x;
       if ((dx > 0) === (p.vx > 0)) continue;
-      if (Math.abs(dx) < 260 && Math.abs(p.y - (self.pos.y - 50)) < 90) return true;
+      if (Math.abs(dx) < 300 && Math.abs(p.y - (self.pos.y - 50)) < 100) return true;
     }
     return false;
   }
@@ -273,6 +268,7 @@ class AIController {
     if (actions.attack)  f.attack();
     if (actions.kick)    f.kick();
     if (actions.special) f.useSpecial(projectileManager);
+    if (actions.dash)    f.dash();
     if (actions.defend)  f.startDefend();
     else                 f.stopDefend();
   }

@@ -18,7 +18,7 @@ const AudioManager = (() => {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = ctx.createGain();
-    masterGain.gain.value = 0.5;
+    masterGain.gain.value = 0.6;
     masterGain.connect(ctx.destination);
   }
 
@@ -56,22 +56,33 @@ const AudioManager = (() => {
   }
 
   // ─── SOUND EFFECTS ───────────────────────────────────────────
+  let lastHitTime = 0;
+  let hitCooldown = 0.08;
   const sounds = {
 
-    /** Quick punchy hit */
+    /** Quick punchy hit - with cooldown to prevent audio spam */
     hit() {
-      const t = ctx.currentTime;
-      osc('square', 180, t, 0.12, 0.5);
-      osc('sawtooth', 90, t + 0.01, 0.10, 0.3);
-      noise(0.08, 0.25);
+      const now = ctx.currentTime;
+      if (now - lastHitTime < hitCooldown) return;
+      lastHitTime = now;
+      
+      const variation = Math.random() * 40 - 20;
+      const vol = 0.25 + Math.random() * 0.1;
+      osc('square', 160 + variation, now, 0.08, vol);
+      osc('triangle', 80 + variation * 0.5, now + 0.01, 0.07, vol * 0.6);
+      noise(0.05, vol * 0.3);
     },
 
     /** Stronger hit */
     heavyHit() {
-      const t = ctx.currentTime;
-      osc('square', 100, t, 0.2, 0.7);
-      osc('sawtooth', 55, t + 0.02, 0.18, 0.4);
-      noise(0.15, 0.4);
+      const now = ctx.currentTime;
+      if (now - lastHitTime < hitCooldown * 1.5) return;
+      lastHitTime = now;
+      
+      const variation = Math.random() * 30 - 15;
+      osc('square', 90 + variation, now, 0.15, 0.4);
+      osc('sawtooth', 50 + variation * 0.5, now + 0.02, 0.12, 0.25);
+      noise(0.1, 0.25);
     },
 
     /** Block / defense */
@@ -82,7 +93,7 @@ const AudioManager = (() => {
       o.type = 'sine';
       o.frequency.setValueAtTime(600, t);
       o.frequency.exponentialRampToValueAtTime(300, t + 0.3);
-      g.gain.setValueAtTime(0.35, t);
+      g.gain.setValueAtTime(0.25, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
       o.connect(g); g.connect(masterGain);
       o.start(t); o.stop(t + 0.35);
@@ -91,15 +102,15 @@ const AudioManager = (() => {
     /** Special power release */
     special() {
       const t = ctx.currentTime;
-      osc('sawtooth', 220, t, 0.05, 0.6);
-      osc('sine', 440, t + 0.05, 0.4, 0.5);
-      osc('triangle', 880, t + 0.1, 0.35, 0.3);
+      osc('sawtooth', 220, t, 0.05, 0.5);
+      osc('sine', 440, t + 0.05, 0.35, 0.4);
+      osc('triangle', 880, t + 0.1, 0.3, 0.25);
       const o = ctx.createOscillator();
       const g = ctx.createGain();
       o.type = 'sawtooth';
       o.frequency.setValueAtTime(800, t + 0.1);
       o.frequency.exponentialRampToValueAtTime(100, t + 0.5);
-      g.gain.setValueAtTime(0.4, t + 0.1);
+      g.gain.setValueAtTime(0.3, t + 0.1);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
       o.connect(g); g.connect(masterGain);
       o.start(t + 0.1); o.stop(t + 0.6);
@@ -108,9 +119,9 @@ const AudioManager = (() => {
     /** Projectile impact */
     projectileHit() {
       const t = ctx.currentTime;
-      noise(0.18, 0.5);
-      osc('square', 200, t, 0.18, 0.4);
-      osc('sine', 120, t + 0.05, 0.15, 0.35);
+      noise(0.12, 0.3);
+      osc('square', 180, t, 0.12, 0.3);
+      osc('sine', 100, t + 0.05, 0.1, 0.25);
     },
 
     /** Jump whoosh */
@@ -121,17 +132,42 @@ const AudioManager = (() => {
       o.type = 'sine';
       o.frequency.setValueAtTime(200, t);
       o.frequency.exponentialRampToValueAtTime(500, t + 0.15);
-      g.gain.setValueAtTime(0.3, t);
+      g.gain.setValueAtTime(0.2, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
       o.connect(g); g.connect(masterGain);
       o.start(t); o.stop(t + 0.2);
     },
 
+    /** Dash whoosh */
+    dash() {
+      const t = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(600, t + 0.08);
+      g.gain.setValueAtTime(0.15, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      o.connect(g); g.connect(masterGain);
+      o.start(t); o.stop(t + 0.12);
+      noise(0.04, 0.1);
+    },
+
+    /** Counter attack */
+    counter() {
+      const t = ctx.currentTime;
+      osc('square', 400, t, 0.04, 0.35);
+      osc('square', 600, t + 0.04, 0.04, 0.3);
+      osc('square', 800, t + 0.08, 0.06, 0.25);
+      osc('triangle', 200, t, 0.15, 0.3);
+      noise(0.08, 0.2);
+    },
+
     /** Landing thud */
     land() {
       const t = ctx.currentTime;
-      osc('sine', 80, t, 0.1, 0.4);
-      noise(0.06, 0.15);
+      osc('sine', 80, t, 0.08, 0.25);
+      noise(0.04, 0.1);
     },
 
     /** KO fanfare */
