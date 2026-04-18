@@ -11,7 +11,6 @@
 
 > Una colección de juegos arcade clásicos reinventados con HTML5, CSS3 y JavaScript vanilla.
 
-**Prueba los juegos en vivo:** [http://3.144.165.2](http://3.144.165.2/)
 
 ---
 
@@ -460,13 +459,6 @@ Datos guardados en `localStorage`:
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-
----
-
-## 📧 Contacto
-
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- Proyecto en vivo: [http://3.144.165.2](http://3.144.165.2/)
 
 ---
 
